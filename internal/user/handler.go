@@ -3,7 +3,9 @@ package user
 import (
 	"net/http"
 
+	"github.com/laujuvi/login-system/internal/user/model"
 	"github.com/laujuvi/login-system/pkg/dto"
+
 	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +25,7 @@ func Register(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	user := User{
+	user := model.User{
 		Username: req.Username,
 		Email:    req.Email,
 		Password: string(hashedPassword),
@@ -35,4 +37,31 @@ func Register(c *gin.Context, db *gorm.DB) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered"})
+}
+
+func GetProfile(c *gin.Context, db *gorm.DB) {
+	userIDInterface, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in context"})
+		return
+	}
+
+	userIDFloat, ok := userIDInterface.(float64) // MapClaims usa float64
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+
+	var user model.User
+	if err := db.First(&user, uint(userIDFloat)).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":        user.ID,
+		"username":  user.Username,
+		"email":     user.Email,
+		"createdAt": user.CreatedAt,
+	})
 }

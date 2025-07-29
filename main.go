@@ -24,11 +24,19 @@ func main() {
 
 	r.POST("/auth/refresh", auth.Refresh)
 
-	// Rutas protegidas
-	protected := r.Group("/auth")
+	protected := r.Group("/")
 	protected.Use(middleware.JWTAuthMiddleware())
 	{
-		protected.GET("/profile", func(c *gin.Context) {
+		protected.GET("/getProfile", func(c *gin.Context) {
+			user.GetProfile(c, database.DB)
+		})
+	}
+
+	// Rutas protegidas
+	authProtected := r.Group("/auth")
+	authProtected.Use(middleware.JWTAuthMiddleware())
+	{
+		authProtected.GET("/profile", func(c *gin.Context) {
 			email := c.GetString("email")
 			userID := c.GetString("user_id")
 

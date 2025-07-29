@@ -5,9 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/laujuvi/login-system/internal/user"
-
 	"github.com/joho/godotenv"
+	"github.com/laujuvi/login-system/internal/user/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -33,7 +32,7 @@ func Init() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
-	db.AutoMigrate(&user.User{})
+	db.AutoMigrate(&model.User{})
 
 	DB = db
 }
